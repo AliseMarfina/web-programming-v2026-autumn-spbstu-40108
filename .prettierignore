@@ -1,0 +1,6 @@
+.github/
+node_modules/
+dist/
+grader-results/
+playwright-report/
+test-results/
