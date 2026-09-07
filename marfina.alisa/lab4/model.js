@@ -41,10 +41,11 @@ export function getUniqueParticipants(events) {
 
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
+    // Приоритет: participantCount (геттер или свойство), затем длина массива
     const count =
-      event.participantCount !== undefined
+      typeof event.participantCount === 'number'
         ? event.participantCount
-        : event.participants
+        : Array.isArray(event.participants)
           ? event.participants.length
           : 0;
 
