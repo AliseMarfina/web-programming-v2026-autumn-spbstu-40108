@@ -79,11 +79,10 @@ function getParticipantCount(event) {
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
     const count = getParticipantCount(event);
-    const key = String(count);
-    if (!acc[key]) {
-      acc[key] = [];
+    if (!acc[count]) {
+      acc[count] = [];
     }
-    acc[key].push(event);
+    acc[count].push(event);
     return acc;
   }, {});
 }
