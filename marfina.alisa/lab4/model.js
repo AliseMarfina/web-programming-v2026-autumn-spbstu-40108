@@ -88,13 +88,13 @@ export function groupEventsByParticipantCount(events) {
   }, {});
 }
 
-export function getEventsByParticipant(events, participantName) {
+export function findEventsByParticipant(events, participantName) {
   return events.filter((event) =>
     (event.participants || []).includes(participantName),
   );
 }
 
-export function getEventsByMonth(events, month) {
+export function findEventsByMonth(events, month) {
   const targetMonth = Number(month);
   return events.filter((event) => {
     const d = event.date instanceof Date ? event.date : new Date(event.date);
