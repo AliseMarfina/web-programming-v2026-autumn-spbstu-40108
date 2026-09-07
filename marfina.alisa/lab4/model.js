@@ -39,46 +39,15 @@ export function getUniqueParticipants(events) {
   return [...new Set(events.flatMap((event) => event.participants || []))];
 }
 
-function getParticipantCount(event) {
-  if (typeof event.participantCount === 'number') {
-    return event.participantCount;
-  }
-
-  const p = event.participants;
-
-  if (Array.isArray(p)) {
-    return p.length;
-  }
-  if (p instanceof Set || p instanceof Map) {
-    return p.size;
-  }
-  if (typeof p === 'number') {
-    return p;
-  }
-  if (typeof p === 'string') {
-    const trimmed = p.trim();
-    return trimmed === ''
-      ? 0
-      : trimmed
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean).length;
-  }
-  if (p && typeof p === 'object') {
-    if ('length' in p) {
-      return Number(p.length) || 0;
-    }
-    if ('size' in p) {
-      return Number(p.size) || 0;
-    }
-  }
-
-  return 0;
-}
-
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
-    const count = getParticipantCount(event);
+    const count =
+      event.participantCount !== undefined
+        ? event.participantCount
+        : event.participants
+          ? event.participants.length
+          : 0;
+
     if (!acc[count]) {
       acc[count] = [];
     }
