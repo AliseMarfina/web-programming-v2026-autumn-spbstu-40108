@@ -39,27 +39,51 @@ export function getUniqueParticipants(events) {
   return [...new Set(events.flatMap((event) => event.participants || []))];
 }
 
+function getParticipantCount(event) {
+  if (typeof event.participantCount === 'number') {
+    return event.participantCount;
+  }
+
+  const p = event.participants;
+
+  if (Array.isArray(p)) {
+    return p.length;
+  }
+  if (p instanceof Set || p instanceof Map) {
+    return p.size;
+  }
+  if (typeof p === 'number') {
+    return p;
+  }
+  if (typeof p === 'string') {
+    const trimmed = p.trim();
+    return trimmed === ''
+      ? 0
+      : trimmed
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean).length;
+  }
+  if (p && typeof p === 'object') {
+    if ('length' in p) {
+      return Number(p.length) || 0;
+    }
+    if ('size' in p) {
+      return Number(p.size) || 0;
+    }
+  }
+
+  return 0;
+}
+
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
-    let count = 0;
-    if (typeof event.participantCount === 'number') {
-      count = event.participantCount;
-    } else if (Array.isArray(event.participants)) {
-      count = event.participants.length;
-    } else if (typeof event.participants === 'string') {
-      count = event.participants.trim() === '' ? 0 : 1;
-    } else if (
-      event.participants &&
-      typeof event.participants === 'object' &&
-      'length' in event.participants
-    ) {
-      count = event.participants.length;
+    const count = getParticipantCount(event);
+    const key = String(count);
+    if (!acc[key]) {
+      acc[key] = [];
     }
-    count = Number(count) || 0;
-    if (!acc[String(count)]) {
-      acc[String(count)] = [];
-    }
-    acc[String(count)].push(event);
+    acc[key].push(event);
     return acc;
   }, {});
 }
