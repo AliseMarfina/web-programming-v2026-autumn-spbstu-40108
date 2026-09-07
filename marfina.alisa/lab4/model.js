@@ -29,22 +29,24 @@ export function groupEventsByDate(events) {
         : String(event.date);
     if (!acc[dateKey]) {
       acc[dateKey] = [];
-    } // Исправлено: добавлены фигурные скобки
+    }
     acc[dateKey].push(event);
     return acc;
   }, {});
 }
 
 export function getUniqueParticipants(events) {
-  return [...new Set(events.flatMap((event) => event.participants))];
+  return [...new Set(events.flatMap((event) => event.participants || []))];
 }
 
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
     const count =
-      event instanceof Event
+      event.participantCount !== undefined
         ? event.participantCount
-        : (event.participants?.length ?? 0);
+        : Array.isArray(event.participants)
+          ? event.participants.length
+          : 0;
     if (!acc[count]) {
       acc[count] = [];
     }
@@ -54,7 +56,9 @@ export function groupEventsByParticipantCount(events) {
 }
 
 export function getEventsByParticipant(events, participantName) {
-  return events.filter((event) => event.participants.includes(participantName));
+  return events.filter((event) =>
+    (event.participants || []).includes(participantName),
+  );
 }
 
 export function getEventsByMonth(events, month) {
