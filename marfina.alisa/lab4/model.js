@@ -43,7 +43,7 @@ export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
     const count = Array.isArray(event.participants)
       ? event.participants.length
-      : (event.participantCount ?? 0);
+      : 0;
     if (!acc[count]) {
       acc[count] = [];
     }
