@@ -4,20 +4,19 @@ export class Event {
     this.title = String(title);
     this.participants = Array.isArray(participants) ? participants : [];
     this.date = date;
+    this.participantCount = this.participants.length;
   }
 
   addParticipant(name) {
     if (!this.participants.includes(name)) {
       this.participants.push(name);
+      this.participantCount = this.participants.length;
     }
   }
 
   removeParticipant(name) {
     this.participants = this.participants.filter((p) => p !== name);
-  }
-
-  get participantCount() {
-    return this.participants.length;
+    this.participantCount = this.participants.length;
   }
 }
 
@@ -41,7 +40,7 @@ export function getUniqueParticipants(events) {
 
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
-    const count = event.participants.length;
+    const count = event.participantCount;
     if (!acc[count]) {
       acc[count] = [];
     }
