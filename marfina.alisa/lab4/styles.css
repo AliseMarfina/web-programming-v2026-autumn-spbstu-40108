@@ -41,7 +41,7 @@ main {
   font-size: 14px;
 }
 
-form[data-testid="entity-form"] {
+form[data-testid='entity-form'] {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -52,7 +52,7 @@ form[data-testid="entity-form"] {
   box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
 }
 
-form[data-testid="entity-form"] input {
+form[data-testid='entity-form'] input {
   flex: 1;
   min-width: 150px;
   padding: 8px;
@@ -60,7 +60,7 @@ form[data-testid="entity-form"] input {
   border-radius: 4px;
 }
 
-form[data-testid="entity-form"] button {
+form[data-testid='entity-form'] button {
   padding: 8px 16px;
   background-color: #007bff;
   color: white;
@@ -70,17 +70,17 @@ form[data-testid="entity-form"] button {
   font-weight: bold;
 }
 
-form[data-testid="entity-form"] button:hover {
+form[data-testid='entity-form'] button:hover {
   background-color: #0056b3;
 }
 
-[data-testid="entity-list"] {
+[data-testid='entity-list'] {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-[data-testid="entity-card"] {
+[data-testid='entity-card'] {
   background: #fff;
   padding: 15px;
   border-radius: 8px;
@@ -88,7 +88,7 @@ form[data-testid="entity-form"] button:hover {
   border: 1px solid #e0e0e0;
 }
 
-[data-testid="entity-card"] h3 {
+[data-testid='entity-card'] h3 {
   margin-top: 0;
   color: #333;
 }
@@ -110,11 +110,11 @@ form[data-testid="entity-form"] button:hover {
   background-color: #e0a800;
 }
 
-[data-testid="delete-entity"] {
+[data-testid='delete-entity'] {
   background-color: #dc3545;
   margin-left: auto;
 }
 
-[data-testid="delete-entity"]:hover {
+[data-testid='delete-entity']:hover {
   background-color: #c82333;
 }
