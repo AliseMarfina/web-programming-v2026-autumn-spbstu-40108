@@ -41,9 +41,10 @@ export function getUniqueParticipants(events) {
 
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
-    const count = Array.isArray(event.participants)
-      ? event.participants.length
-      : 0;
+    const count =
+      event instanceof Event
+        ? event.participantCount
+        : (event.participants?.length ?? 0);
     if (!acc[count]) {
       acc[count] = [];
     }
