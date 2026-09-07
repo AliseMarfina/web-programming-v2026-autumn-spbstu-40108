@@ -41,16 +41,25 @@ export function getUniqueParticipants(events) {
 
 export function groupEventsByParticipantCount(events) {
   return events.reduce((acc, event) => {
-    const count =
-      typeof event.participantCount === 'number'
-        ? event.participantCount
-        : Array.isArray(event.participants)
-          ? event.participants.length
-          : 0;
-    if (!acc[count]) {
-      acc[count] = [];
+    let count = 0;
+    if (typeof event.participantCount === 'number') {
+      count = event.participantCount;
+    } else if (Array.isArray(event.participants)) {
+      count = event.participants.length;
+    } else if (typeof event.participants === 'string') {
+      count = event.participants.trim() === '' ? 0 : 1;
+    } else if (
+      event.participants &&
+      typeof event.participants === 'object' &&
+      'length' in event.participants
+    ) {
+      count = event.participants.length;
     }
-    acc[count].push(event);
+    count = Number(count) || 0;
+    if (!acc[String(count)]) {
+      acc[String(count)] = [];
+    }
+    acc[String(count)].push(event);
     return acc;
   }, {});
 }
