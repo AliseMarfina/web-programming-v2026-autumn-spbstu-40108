@@ -15,7 +15,7 @@ const checkWinner = (board) => {
       return { winner: board[a], line };
     }
   }
-  if (board.every(cell => cell !== null)) {
+  if (board.every((cell) => cell !== null)) {
     return { winner: 'draw', line: null };
   }
   return null;
@@ -24,8 +24,12 @@ const checkWinner = (board) => {
 const minimax = (board, isMaximizing, ai, human, depth = 0) => {
   const result = checkWinner(board);
   if (result) {
-    if (result.winner === ai) return 10 - depth;
-    if (result.winner === human) return depth - 10;
+    if (result.winner === ai) {
+      return 10 - depth;
+    }
+    if (result.winner === human) {
+      return depth - 10;
+    }
     return 0;
   }
   const current = isMaximizing ? ai : human;
@@ -59,7 +63,7 @@ const getBestMove = (board, ai, human) => {
 };
 
 const getRandomMove = (board) => {
-  const empty = board.map((v, i) => (v === null ? i : -1)).filter(i => i !== -1);
+  const empty = board.map((v, i) => (v === null ? i : -1)).filter((i) => i !== -1);
   return empty[Math.floor(Math.random() * empty.length)];
 };
 
@@ -75,7 +79,6 @@ function App() {
     }
   })[0];
 
-  const [screen, setScreen] = useState(saved?.screen || 'menu');
   const [mode, setMode] = useState(saved?.mode || 'pvc');
   const [difficulty, setDifficulty] = useState(saved?.difficulty || 'hard');
   const [humanSign, setHumanSign] = useState(saved?.humanSign || 'X');
@@ -87,12 +90,12 @@ function App() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const state = { screen, mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove };
+    const state = { mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [screen, mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove]);
+  }, [mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove]);
 
   useEffect(() => {
-    if (screen !== 'game' || mode !== 'pvc' || winnerInfo || current === humanSign) {
+    if (mode !== 'pvc' || winnerInfo || current === humanSign) {
       return;
     }
     const timer = setTimeout(() => {
@@ -103,11 +106,11 @@ function App() {
       }
     }, 350);
     return () => clearTimeout(timer);
-  }, [screen, mode, winnerInfo, current, humanSign, difficulty, board]);
+  }, [mode, winnerInfo, current, humanSign, difficulty, board]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || screen !== 'game') {
+    if (!canvas) {
       return;
     }
     const ctx = canvas.getContext('2d');
@@ -181,53 +184,45 @@ function App() {
       ctx.lineTo(cx, cy);
       ctx.stroke();
     }
-  }, [board, winnerInfo, lastMove, screen]);
+  }, [board, winnerInfo, lastMove]);
 
-  const makeMove = useCallback((index, signOverride) => {
-    setBoard(prev => {
-      if (prev[index] !== null) {
-        return prev;
-      }
-      const sign = signOverride || current;
-      const next = prev.slice();
-      next[index] = sign;
-      setLastMove(index);
-      const result = checkWinner(next);
-      if (result) {
-        setWinnerInfo(result);
-        if (result.winner === 'draw') {
-          setScore(s => ({ ...s, draw: s.draw + 1 }));
-        } else {
-          setScore(s => ({ ...s, [result.winner]: s[result.winner] + 1 }));
+  const makeMove = useCallback(
+    (index, signOverride) => {
+      setBoard((prev) => {
+        if (prev[index] !== null) {
+          return prev;
         }
-        setTimeout(() => setScreen('result'), 700);
+        const sign = signOverride || current;
+        const next = prev.slice();
+        next[index] = sign;
+        setLastMove(index);
+        const result = checkWinner(next);
+        if (result) {
+          setWinnerInfo(result);
+          if (result.winner === 'draw') {
+            setScore((s) => ({ ...s, draw: s.draw + 1 }));
+          } else {
+            setScore((s) => ({ ...s, [result.winner]: s[result.winner] + 1 }));
+          }
+          return next;
+        }
+        setCurrent(sign === 'X' ? 'O' : 'X');
         return next;
-      }
-      setCurrent(sign === 'X' ? 'O' : 'X');
-      return next;
-    });
-  }, [current]);
-
-  const startGame = (newMode, newDifficulty, newSign) => {
-    setMode(newMode);
-    setDifficulty(newDifficulty);
-    setHumanSign(newSign);
-    setBoard(Array(9).fill(null));
-    setCurrent('X');
-    setWinnerInfo(null);
-    setLastMove(null);
-    setScreen('game');
-  };
+      });
+    },
+    [current]
+  );
 
   const restart = () => {
     setBoard(Array(9).fill(null));
     setCurrent('X');
     setWinnerInfo(null);
     setLastMove(null);
-    setScreen('game');
   };
 
-  const resetScore = () => setScore({ X: 0, O: 0, draw: 0 });
+  const resetScore = () => {
+    setScore({ X: 0, O: 0, draw: 0 });
+  };
 
   const handleCellClick = (i) => {
     if (winnerInfo || board[i]) {
@@ -239,70 +234,116 @@ function App() {
     makeMove(i);
   };
 
-  if (screen === 'menu') {
-    return (
-      <section className="menu" data-testid="menu-screen">
-        <h1 className="title" data-testid="title">Крестики-нолики</h1>
-        <p className="subtitle">Выберите режим игры</p>
-        <div className="menu-group">
-          <label>Режим:</label>
-          <div className="btn-row">
-            <button data-testid="mode-pvc" className={mode === 'pvc' ? 'active' : ''} onClick={() => setMode('pvc')}>Против компьютера</button>
-            <button data-testid="mode-pvp" className={mode === 'pvp' ? 'active' : ''} onClick={() => setMode('pvp')}>Два игрока</button>
-          </div>
-        </div>
-        {mode === 'pvc' && (
-          <>
-            <div className="menu-group">
-              <label>Сложность:</label>
-              <div className="btn-row">
-                <button data-testid="diff-easy" className={difficulty === 'easy' ? 'active' : ''} onClick={() => setDifficulty('easy')}>Легко</button>
-                <button data-testid="diff-hard" className={difficulty === 'hard' ? 'active' : ''} onClick={() => setDifficulty('hard')}>Непобедимый</button>
-              </div>
-            </div>
-            <div className="menu-group">
-              <label>Ваш знак:</label>
-              <div className="btn-row">
-                <button data-testid="sign-X" className={humanSign === 'X' ? 'active' : ''} onClick={() => setHumanSign('X')}>X</button>
-                <button data-testid="sign-O" className={humanSign === 'O' ? 'active' : ''} onClick={() => setHumanSign('O')}>O</button>
-              </div>
-            </div>
-          </>
-        )}
-        <button className="start-btn" data-testid="start-button" onClick={() => startGame(mode, difficulty, humanSign)}>Начать игру</button>
-      </section>
-    );
-  }
-
-  if (screen === 'result') {
-    const title = winnerInfo.winner === 'draw' ? 'Ничья' : mode === 'pvc' ? (winnerInfo.winner === humanSign ? 'Победа!' : 'Поражение') : `Победил ${winnerInfo.winner}`;
-    return (
-      <section className="result" data-testid="result-screen">
-        <h2 data-testid="result-title">{title}</h2>
-        <p className="result-sign" data-testid="result-sign">{winnerInfo.winner === 'draw' ? '—' : winnerInfo.winner}</p>
-        <div className="result-actions">
-          <button data-testid="game-restart" onClick={restart}>Играть снова</button>
-          <button data-testid="menu-button" onClick={() => setScreen('menu')}>В меню</button>
-          <button data-testid="reset-score-button" onClick={resetScore}>Сбросить счёт</button>
-        </div>
-      </section>
-    );
-  }
-
-  const statusText = winnerInfo ? (winnerInfo.winner === 'draw' ? 'Ничья!' : mode === 'pvc' ? (winnerInfo.winner === humanSign ? 'Вы победили!' : 'Компьютер победил') : `Победили ${winnerInfo.winner}!`) : mode === 'pvc' ? (current === humanSign ? 'Ваш ход' : 'Ход компьютера...') : `Ход: ${current}`;
+  const statusText = winnerInfo
+    ? winnerInfo.winner === 'draw'
+      ? 'Ничья!'
+      : mode === 'pvc'
+      ? winnerInfo.winner === humanSign
+        ? 'Вы победили!'
+        : 'Компьютер победил'
+      : `Победили ${winnerInfo.winner}!`
+    : mode === 'pvc'
+    ? current === humanSign
+      ? 'Ваш ход'
+      : 'Ход компьютера...'
+    : `Ход: ${current}`;
 
   return (
     <section className="game" data-testid="game-screen">
+      <h1 className="title" data-testid="title">
+        Крестики-нолики
+      </h1>
+
+      <div className="menu-group">
+        <label>Режим:</label>
+        <div className="btn-row">
+          <button
+            data-testid="mode-pvc"
+            className={mode === 'pvc' ? 'active' : ''}
+            onClick={() => {
+              setMode('pvc');
+              restart();
+            }}
+          >
+            Против компьютера
+          </button>
+          <button
+            data-testid="mode-pvp"
+            className={mode === 'pvp' ? 'active' : ''}
+            onClick={() => {
+              setMode('pvp');
+              restart();
+            }}
+          >
+            Два игрока
+          </button>
+        </div>
+      </div>
+
+      {mode === 'pvc' && (
+        <>
+          <div className="menu-group">
+            <label>Сложность:</label>
+            <div className="btn-row">
+              <button
+                data-testid="diff-easy"
+                className={difficulty === 'easy' ? 'active' : ''}
+                onClick={() => {
+                  setDifficulty('easy');
+                  restart();
+                }}
+              >
+                Легко
+              </button>
+              <button
+                data-testid="diff-hard"
+                className={difficulty === 'hard' ? 'active' : ''}
+                onClick={() => {
+                  setDifficulty('hard');
+                  restart();
+                }}
+              >
+                Непобедимый
+              </button>
+            </div>
+          </div>
+          <div className="menu-group">
+            <label>Ваш знак:</label>
+            <div className="btn-row">
+              <button
+                data-testid="sign-X"
+                className={humanSign === 'X' ? 'active' : ''}
+                onClick={() => {
+                  setHumanSign('X');
+                  restart();
+                }}
+              >
+                X
+              </button>
+              <button
+                data-testid="sign-O"
+                className={humanSign === 'O' ? 'active' : ''}
+                onClick={() => {
+                  setHumanSign('O');
+                  restart();
+                }}
+              >
+                O
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="scoreboard" data-testid="scoreboard">
         <span data-testid="score-X">X: {score.X}</span>
         <span data-testid="score-draw">Ничьи: {score.draw}</span>
         <span data-testid="score-O">O: {score.O}</span>
       </div>
-      <div className="status" data-testid="status">{statusText}</div>
 
-      <button data-testid="game-restart" onClick={restart} className="restart-inline-btn" style={{ marginBottom: '12px', padding: '8px 16px', background: '#313244', color: '#cdd6f4', border: '1px solid #45475a', borderRadius: '8px', cursor: 'pointer' }}>
-        Заново
-      </button>
+      <div className="status" data-testid="status">
+        {statusText}
+      </div>
 
       <div className="board-wrapper" data-testid="game-board" style={{ width: 360, height: 360, position: 'relative' }}>
         <canvas ref={canvasRef} style={{ width: 360, height: 360, display: 'block' }} />
@@ -318,6 +359,15 @@ function App() {
           ))}
         </div>
       </div>
+
+      <div className="result-actions" style={{ marginTop: '16px' }}>
+        <button data-testid="game-restart" onClick={restart}>
+          Начать заново
+        </button>
+        <button data-testid="reset-score-button" onClick={resetScore}>
+          Сбросить счёт
+        </button>
+      </div>
     </section>
   );
 }
@@ -331,5 +381,5 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 );
