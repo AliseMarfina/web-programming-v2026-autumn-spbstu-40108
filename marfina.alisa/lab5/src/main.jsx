@@ -1,22 +1,33 @@
-import React, { StrictMode, useState, useEffect, useRef, useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
+import React, {
+  StrictMode,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+import {createRoot} from 'react-dom/client';
 import './styles.css';
 
 const WIN_LINES = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6]
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ];
 
 const checkWinner = (board) => {
   for (const line of WIN_LINES) {
     const [a, b, c] = line;
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      return { winner: board[a], line };
+      return {winner: board[a], line};
     }
   }
   if (board.every((cell) => cell !== null)) {
-    return { winner: 'draw', line: null };
+    return {winner: 'draw', line: null};
   }
   return null;
 };
@@ -63,7 +74,9 @@ const getBestMove = (board, ai, human) => {
 };
 
 const getRandomMove = (board) => {
-  const empty = board.map((v, i) => (v === null ? i : -1)).filter((i) => i !== -1);
+  const empty = board
+    .map((v, i) => (v === null ? i : -1))
+    .filter((i) => i !== -1);
   return empty[Math.floor(Math.random() * empty.length)];
 };
 
@@ -85,14 +98,32 @@ function App() {
   const [board, setBoard] = useState(saved?.board || Array(9).fill(null));
   const [current, setCurrent] = useState(saved?.current || 'X');
   const [winnerInfo, setWinnerInfo] = useState(saved?.winnerInfo || null);
-  const [score, setScore] = useState(saved?.score || { X: 0, O: 0, draw: 0 });
+  const [score, setScore] = useState(saved?.score || {X: 0, O: 0, draw: 0});
   const [lastMove, setLastMove] = useState(saved?.lastMove || null);
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const state = { mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove };
+    const state = {
+      mode,
+      difficulty,
+      humanSign,
+      board,
+      current,
+      winnerInfo,
+      score,
+      lastMove,
+    };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [mode, difficulty, humanSign, board, current, winnerInfo, score, lastMove]);
+  }, [
+    mode,
+    difficulty,
+    humanSign,
+    board,
+    current,
+    winnerInfo,
+    score,
+    lastMove,
+  ]);
 
   useEffect(() => {
     if (mode !== 'pvc' || winnerInfo || current === humanSign) {
@@ -100,7 +131,10 @@ function App() {
     }
     const timer = setTimeout(() => {
       const aiSign = humanSign === 'X' ? 'O' : 'X';
-      const move = difficulty === 'hard' ? getBestMove([...board], aiSign, humanSign) : getRandomMove(board);
+      const move =
+        difficulty === 'hard'
+          ? getBestMove([...board], aiSign, humanSign)
+          : getRandomMove(board);
       if (move !== -1 && move !== undefined) {
         makeMove(move, aiSign);
       }
@@ -200,9 +234,9 @@ function App() {
         if (result) {
           setWinnerInfo(result);
           if (result.winner === 'draw') {
-            setScore((s) => ({ ...s, draw: s.draw + 1 }));
+            setScore((s) => ({...s, draw: s.draw + 1}));
           } else {
-            setScore((s) => ({ ...s, [result.winner]: s[result.winner] + 1 }));
+            setScore((s) => ({...s, [result.winner]: s[result.winner] + 1}));
           }
           return next;
         }
@@ -210,7 +244,7 @@ function App() {
         return next;
       });
     },
-    [current]
+    [current],
   );
 
   const restart = () => {
@@ -221,7 +255,7 @@ function App() {
   };
 
   const resetScore = () => {
-    setScore({ X: 0, O: 0, draw: 0 });
+    setScore({X: 0, O: 0, draw: 0});
   };
 
   const handleCellClick = (i) => {
@@ -238,15 +272,15 @@ function App() {
     ? winnerInfo.winner === 'draw'
       ? 'Ничья!'
       : mode === 'pvc'
-      ? winnerInfo.winner === humanSign
-        ? 'Вы победили!'
-        : 'Компьютер победил'
-      : `Победили ${winnerInfo.winner}!`
+        ? winnerInfo.winner === humanSign
+          ? 'Вы победили!'
+          : 'Компьютер победил'
+        : `Победили ${winnerInfo.winner}!`
     : mode === 'pvc'
-    ? current === humanSign
-      ? 'Ваш ход'
-      : 'Ход компьютера...'
-    : `Ход: ${current}`;
+      ? current === humanSign
+        ? 'Ваш ход'
+        : 'Ход компьютера...'
+      : `Ход: ${current}`;
 
   return (
     <section className="game" data-testid="game-screen">
@@ -345,22 +379,31 @@ function App() {
         {statusText}
       </div>
 
-      <div className="board-wrapper" data-testid="game-board" style={{ width: 360, height: 360, position: 'relative' }}>
-        <canvas ref={canvasRef} style={{ width: 360, height: 360, display: 'block' }} />
+      <div
+        className="board-wrapper"
+        data-testid="game-board"
+        style={{width: 360, height: 360, position: 'relative'}}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{width: 360, height: 360, display: 'block'}}
+        />
         <div className="board-overlay">
-          {board.map((_, i) => (
+          {board.map((cell, i) => (
             <button
               key={i}
               className="cell-btn"
               data-testid="game-cell"
-              disabled={!!board[i] || !!winnerInfo}
+              disabled={!!cell || !!winnerInfo}
               onClick={() => handleCellClick(i)}
-            />
+            >
+              {cell || ''}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="result-actions" style={{ marginTop: '16px' }}>
+      <div className="result-actions" style={{marginTop: '16px'}}>
         <button data-testid="game-restart" onClick={restart}>
           Начать заново
         </button>
@@ -381,5 +424,5 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );
